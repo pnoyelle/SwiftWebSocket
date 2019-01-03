@@ -716,20 +716,20 @@ private class InnerWebSocket: Hashable {
                 switch frame.code {
                 case .text:
                     fire {
-                        self.event.message(frame.utf8.text)
+                        self.event.message(data: frame.utf8.text)
                         self.eventDelegate?.webSocketMessageText?(frame.utf8.text)
                     }
                 case .binary:
                     fire {
                         switch self.binaryType {
                         case .uInt8Array:
-                            self.event.message(frame.payload.array)
+                            self.event.message(data: frame.payload.array)
                         case .nsData:
-                            self.event.message(frame.payload.nsdata)
+                            self.event.message(data: frame.payload.nsdata)
                             // The WebSocketDelegate is necessary to add Objective-C compability and it is only possible to send binary data with NSData.
                             self.eventDelegate?.webSocketMessageData?(frame.payload.nsdata)
                         case .uInt8UnsafeBufferPointer:
-                            self.event.message(frame.payload.buffer)
+                            self.event.message(data: frame.payload.buffer)
                         }
                     }
                 case .ping:
@@ -742,11 +742,11 @@ private class InnerWebSocket: Hashable {
                     fire {
                         switch self.binaryType {
                         case .uInt8Array:
-                            self.event.pong(frame.payload.array)
+                            self.event.pong(data: frame.payload.array)
                         case .nsData:
-                            self.event.pong(frame.payload.nsdata)
+                            self.event.pong(data: frame.payload.nsdata)
                         case .uInt8UnsafeBufferPointer:
-                            self.event.pong(frame.payload.buffer)
+                            self.event.pong(data: frame.payload.buffer)
                         }
                         self.eventDelegate?.webSocketPong?()
                     }
@@ -1024,7 +1024,7 @@ private class InnerWebSocket: Hashable {
 			security = .none
 		}
 
-        var path = CFURLCopyPath(req.url! as CFURL?) as String
+		var path = CFURLCopyPath(req.url! as CFURL!) as String
         if path == "" {
             path = "/"
         }
@@ -1058,7 +1058,7 @@ private class InnerWebSocket: Hashable {
         var (rdo, wro) : (InputStream?, OutputStream?)
         var readStream:  Unmanaged<CFReadStream>?
         var writeStream: Unmanaged<CFWriteStream>?
-        CFStreamCreatePairWithSocketToHost(nil, addr[0] as CFString?, UInt32(Int(addr[1])!), &readStream, &writeStream);
+        CFStreamCreatePairWithSocketToHost(nil, addr[0] as CFString!, UInt32(Int(addr[1])!), &readStream, &writeStream);
         rdo = readStream!.takeRetainedValue()
         wro = writeStream!.takeRetainedValue()
         (rd, wr) = (rdo!, wro!)
